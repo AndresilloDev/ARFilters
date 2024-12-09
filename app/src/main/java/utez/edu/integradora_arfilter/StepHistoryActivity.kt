@@ -16,6 +16,8 @@ import utez.edu.integradora_arfilter.R
 import utez.edu.integradora_arfilter.adapters.StepHistoryAdapter
 import utez.edu.integradora_arfilter.models.StepHistory
 import utez.edu.integradora_arfilter.models.StepRecord
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class StepHistoryActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -26,7 +28,6 @@ class StepHistoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_step_history)
 
-        // Enable back button in action bar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         recyclerView = findViewById(R.id.recyclerViewStepHistory)
@@ -40,6 +41,7 @@ class StepHistoryActivity : AppCompatActivity() {
 
     private fun fetchStepHistory() {
         val userId = firebaseAuth.currentUser?.uid ?: return
+        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 
         database.child("users").child(userId).child("steps")
             .addListenerForSingleValueEvent(object : ValueEventListener {
@@ -58,8 +60,8 @@ class StepHistoryActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Sort by date in descending order
-                    stepHistoryList.sortByDescending { it.date }
+                    // Sort by date in descending order using parsed dates
+                    stepHistoryList.sortByDescending { dateFormat.parse(it.date) }
 
                     val adapter = StepHistoryAdapter(stepHistoryList)
                     recyclerView.adapter = adapter
